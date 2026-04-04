@@ -1,0 +1,60 @@
+================================================================================
+ESAME DI SISTEMI OPERATIVI - PROVA DI LABORATORIO
+TITOLO: Sincronizzazione Host-Writer (Modello Master/Worker)
+================================================================================
+
+DESCRIZIONE DEL PROBLEMA
+Si realizzi un programma multithread in linguaggio C (utilizzando la libreria 
+<pthread.h> e i semafori forniti in "mac_sem.h") per simulare l'accesso 
+sincronizzato a una risorsa condivisa (una variabile intera).
+
+Il programma deve creare un'architettura formata da N=4 thread "Writer" 
+e 1 thread "Host".
+
+REGOLE DI SINCRONIZZAZIONE (BARRIERA E MUTUA ESCLUSIONE):
+1. Ordine di partenza: 
+   Tutti i thread Writer, appena creati, devono bloccarsi in attesa di 
+   un segnale di "Via" specifico per ciascuno di essi.
+   
+2. Il thread Host:
+   - Accede per primo in mutua esclusione alla variabile condivisa e la 
+     inizializza al valore 1.
+   - Successivamente, sblocca (notifica) simultaneamente tutti gli N 
+     thread Writer tramite l'uso di semafori.
+   - Infine, si mette in attesa della terminazione delle operazioni di 
+     TUTTI i Writer prima di stampare un messaggio finale di completamento 
+     e terminare la propria esecuzione.
+
+3. I thread Writer:
+   - Una volta sbloccati dall'Host, competono per accedere in Mutua Esclusione 
+     alla variabile condivisa.
+   - Ogni Writer deve: leggere e stampare a video il valore corrente, 
+     sostituirlo con un numero intero pseudo-casuale compreso tra 1 e 100 
+     (utilizzando rigorosamente primitive thread-safe come rand_r()), e 
+     stampare a video il nuovo valore.
+   - Usciti dalla sezione critica, i Writer devono notificare all'Host 
+     che il proprio lavoro è terminato, e infine concludere il proprio ciclo di vita.
+
+VINCOLI PROGETTUALI
+- Attesa attiva vietata: La sincronizzazione tra Host e Writer deve avvenire 
+  esclusivamente tramite semafori.
+- Assenza di Memory Leaks: Ogni struttura dati passata tramite l'allocazione 
+  dinamica della memoria (malloc) deve essere liberata opportunamente prima 
+  della chiusura del thread competente.
+- Pulizia: Tutti i thread devono essere esplicitamente attesi (join) dal main, 
+  e le primitive di sincronizzazione (mutex e semafori) devono essere distrutte.
+
+OUTPUT ATTESO (L'ordine dei Writer è non deterministico):
+[HOST] Inizializzo il valore condiviso a 1.
+
+[WRITER-0] Leggo il valore attuale: 1
+[WRITER-0] Ho modificato il valore in: 42
+[WRITER-2] Leggo il valore attuale: 42
+[WRITER-2] Ho modificato il valore in: 88
+[WRITER-3] Leggo il valore attuale: 88
+[WRITER-3] Ho modificato il valore in: 15
+[WRITER-1] Leggo il valore attuale: 15
+[WRITER-1] Ho modificato il valore in: 73
+
+[HOST] Tutti i thread Writer hanno completato. Esecuzione terminata.
+================================================================================
