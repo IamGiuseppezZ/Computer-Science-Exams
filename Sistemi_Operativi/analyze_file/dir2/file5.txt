@@ -1,0 +1,1 @@
+HELLO in uppercase. hello in lowercase. HeLLo mixed.

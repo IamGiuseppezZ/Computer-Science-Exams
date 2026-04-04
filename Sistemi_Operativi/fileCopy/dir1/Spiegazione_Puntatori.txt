@@ -1,0 +1,97 @@
+Spiego meglio il valore del puntatore:
+Se per esempio, ho un qualcosa del tipo:
+	int a = 30
+	int* ptr_a = &a 
+In questo caso ho un puntatore che punta alla variabile a, se voglio modificare il valore di a che faccio?
+Semplice: 
+	swap(ptr_a) -> nel main 
+	void (int* ptr) {
+		*ptr = 30;
+	}
+In questo modo, ovviamente io non passo il puntatore per riferimento, perchè? Perchè non devo modificare il puntatore ma il valore a cui punta il puntatore. Quindi, il puntatore verrà passato per copia, ma il valore sarà comunque l'indirizzo della variabile, quindi essenzialmente io sto andando a modificare il valore stesso della variabile. Cioè:
+Se int a = 30 -> se ha valore 0x1000de; se faccio ptr_a = &a, allora ptr_a -> 0x1000de ovvero lo stesso valore. Quindi se passo nella funzione il ptr_a, lo passerò per copia, ovvio, ma il puntatore 'ptr_a' è una copia, il valore di ptr_a (sempre come copia) rimarrà 0x1000de, quindi se modifico *ptr_a sto comunque andando a modificare il valore che si trova in 0x1000de.
+
+-------------------
+
+Cambia invece se voglio modificare il valore a cui punta il puntatore, perchè?
+	int a = 30;
+	int b = 40;
+	int* ptr_a = &a;
+	swap(&ptr_a, &b); -> funzione nel main
+Void swap(int** ptr_a, int* b){
+	*ptr_a = b;
+}
+Perchè adesso lo passo come puntatore (di conseguenza doppio puntatore nella funzione)?
+Beh, se lo passassi per copia, adesso creerei un'altra variabile (la variabile copia del parametro) che dentro ha sempre valore 0x1000de, se io gli cambio il valore, non sto cambiando il valore del mio ptr_a originale, ma cambio il valore della nuova variabile passata per copia. Cioè, la nuova variabile copia adesso ha all'interno il valore della variabile b, corretto, però quando la funzione fa il return io perdo la variabile copia e il puntatore originale rimarrà a puntare 0x1000de. 
+Se invece passo swap(&ptr_a) adesso sto passando il puntatore per riferimento e nella funzione dichiaro (int** ptr_a) in questo modo, modifico il puntatore accedendo al valore a cui punta il puntatore, cioè *ptr_a = b; 
+In questo modo non sto cambiando più la copia del mio puntatore, cioè faccio *ptr_a = 0x1000de ma del puntatore originale perchè l'ho passato per riferimento. E dato che sto passando un int* ptr_a per riferimento, quindi passo un puntatore del puntatore, nella funzione lo dichiaro con int** ptr_a perchè appunto sto passando un puntatore (cioè colui che va a modificare il valore stesso della variabile) di un puntatore, quindi int** ptr_a. 
+--------------
+SPIEGO ANCORA MEGLIO:
+
+Se io ho:
+	int a = 30;  a_indirizzo_memoria -> 0x1000de
+	int* ptr_a = &a;  il valore contenuto in ptr_a -> 0x1000de (cioè l'indirizzo in memoria di a) ma ptr_a_indirizzo -> 23xd0002E (cioè il valore del puntatore in memoria)
+	swap(ptr_a) -> chiamo funzione e passo il puntatore per copia.
+Sto pasando un puntatore che, una volta chiamata la funzione, verrà passato per copia, quindi come sappiamo verrà generato un nuovo puntatore copia, ovvero ptr_a_copia il cui valore della copia, nella memoria, non sarà 23xd0002E, perchè è una copia, ma sarà 45f0012E, cioè un altro, ovvero una copia che poi verrà distrutta, quindi, questa copia al suo interno, come valore ha 0x1000de (ovvero l'indirizzo della variabile A), ma l'indirizzo della copia ovviamente sarà 45f0012E, quindi se faccio *ptr_a = 40 -> mi modifica il valore di a in 40, ovvio, perchè ptr_a_copia contiene il valore di a, ma se provo a far puntatore il puntatore a un' altra variabile, tipo ptr_a_copia = *b -> cioè provo a far puntare il puntatore copia (45f0012E e non quello originale 23xd0002E) all'indirizzo di b, funzionerà perfettamente, ma una volta che noi facciamo RETURN della funzione, ptr_a_copia verrà distrutta e ovviamente non ho modificato il mio puntatore originale.
+SE INVECE faccio:
+	swap(&ptr_a) -> non passo più la copia 
+	void swap(int** ptr_a) -> ptr_a (l'indirizzo del puntatore) adesso sarà quello originale, ovvero 23xd002E, non sarà una copia, e quindi ovviamente nella firma della funzione devo passare INT** PTR_A come doppio puntatore perchè devo passare un puntatore che punta all'indirizzo del puntatore PTR_A. Adesso se faccio *ptr_a = *b , sto modificando ptr_a -> 23x0002E quindi quello originale, all'indirizzo della variabile b. Quando faccio RETURN quindi avrò cambiato il puntatore perchè appunto, ho passato il puntatore originale.
+--------
+#include <stdio.h>
+
+void swap(int **a, int *b) {
+    *a = b; // Cambia l'indirizzo a cui punta *a
+}
+
+int main() {
+    int x = 10;
+    int y = 20;
+    int *a = &x; // Puntatore a int che punta a x
+
+    printf("Prima dello swap: *a = %d\n", *a); // Output: 10
+
+    swap(&a, &y); // Passo il puntatore a puntatore di a e l'indirizzo di y
+
+    printf("Dopo lo swap: *a = %d\n", *a); // Output: 20
+
+    return 0;
+}
+QUESTO è l'unico modo per cambiare il valore in memoria della variabile x.
+Quindi in C per cambiare il valore posso fare x = 30. Ma se voglio cambiare l'indirizzo in memoria di x, devo creare un puntatore che punta ad x e da lì cambiare l'indirizzo in memoria.
+----------
+OPPURE NEL MAIN 
+#include <stdio.h>
+
+int main() {
+    int x = 10;
+    int y = 20;
+
+    int *p = &x; // Puntatore a int che inizialmente punta a x
+
+    printf("Prima: p punta a %d\n", *p); // Output: 10
+
+    p = &y; // Cambia l'indirizzo a cui punta p
+
+    printf("Dopo: p punta a %d\n", *p); // Output: 20
+
+    return 0;
+}
+QUINDI gli unici modi che ho sono sempre quelli di creare un puntatore e modificare l'indirizzo in memoria del puntatore stesso. 
+#include <stdio.h>
+
+void swap(int** ptr_a, int* b){
+    *ptr_a = b; // -> perchè int* b è un indirizzo, e metto dentro *ptr_a l'indirizzo di b
+}
+
+int main(){
+    int a = 10;
+    int b = 20;
+    int* ptr_a;
+    ptr_a = &a;
+    printf("%d\n", *ptr_a);
+    swap(&ptr_a, &b);
+    printf("Punto a b: %d\n", *ptr_a);
+
+
+}
+ESEMPIO di prima ma passando per riferimento

@@ -1,0 +1,65 @@
+================================================================================
+ESAME DI SISTEMI OPERATIVI - PROVA DI LABORATORIO
+TITOLO: Modello Client-Server (Request-Reply) tramite Buffer Condiviso
+================================================================================
+
+DESCRIZIONE DEL PROBLEMA
+Si richiede di sviluppare in linguaggio C, utilizzando la libreria <pthread.h> 
+e le primitive di sincronizzazione basate su semafori, un sistema multithread 
+per l'esecuzione di operazioni matematiche esternalizzate.
+
+L'architettura simula un modello Client/Server locale, in cui dei thread "Lettori" 
+(Client) delegano l'esecuzione dei calcoli a un thread "Calcolatore" (Server) 
+sfruttando un buffer circolare condiviso di dimensione MAX_BUFFER = 5.
+
+I thread Lettori vengono generati in numero pari ai file passati tramite 
+riga di comando.
+Uso: ./programma calc1.txt calc2.txt calc3.txt
+
+I file contengono sulla prima riga un'intestazione (da ignorare), e sulle 
+righe successive una sequenza di operazioni matematiche nel formato 
+"<carattere_operatore> <intero>" (es. "+ 5", "* 2").
+
+ARCHITETTURA DEI THREAD E PROTOCOLLO DI COMUNICAZIONE
+
+1. I THREAD "LETTORI" (PRODUTTORI):
+   - Ogni thread lettore deve mantenere in memoria il risultato parziale 
+     (accumulatore), inizializzato a 0.
+   - Leggendo il proprio file riga per riga, ogni volta che elabora 
+     un'operazione, il lettore deve inserire all'interno del Buffer Condiviso 
+     una "Richiesta" strutturata contenente:
+       a. Il valore del proprio accumulatore corrente.
+       b. L'operando numerico letto dal file.
+       c. Il carattere dell'operazione.
+       d. Il proprio ID univoco, essenziale per ricevere la risposta.
+   - Dopo aver depositato la richiesta nel buffer, il thread lettore deve 
+     sospendersi (Wait) su un proprio semaforo personale in attesa 
+     del risultato (Paradigma Request-Reply sincrono).
+   - Una volta risvegliato dal calcolatore, aggiornerà il suo accumulatore e 
+     procederà con la lettura della riga successiva.
+   - Esaurito il file, il thread stampa a video il risultato finale e termina.
+
+2. IL THREAD "CALCOLATORE" (CONSUMATORE):
+   - Il processo principale genererà un SINGOLO thread calcolatore.
+   - Questo thread deve estrarre ciclicamente in mutua esclusione le Richieste 
+     depositate dai lettori all'interno del buffer condiviso.
+   - Analizzato l'operatore, esegue l'operazione matematica.
+   - Depone il risultato in un Array Condiviso di Risposte, nell'indice 
+     corrispondente all'ID del thread richiedente.
+   - Utilizzando l'array di semafori, invia una notifica (Post) per risvegliare 
+     esclusivamente il thread che aveva inoltrato la richiesta.
+   - Deve tenere traccia in una variabile condivisa del numero totale di 
+     calcoli effettuati globalmente.
+
+TERMINAZIONE E VINCOLI
+- Il sistema deve essere esente da Deadlock. Il thread calcolatore deve 
+  terminare la propria esecuzione SOLTANTO dopo aver evaso la totalità 
+  delle richieste di tutti i file.
+- È obbligatorio implementare una logica del tipo "Poison Pill" (Messaggio 
+  Sentinella). L'ultimo thread lettore che completa il suo file, invierà una 
+  speciale richiesta fittizia (es. con id = -1) per segnalare al calcolatore 
+  l'interruzione del servizio.
+- Memory Leaks: L'array di semafori, l'array delle risposte e i parametri 
+  dei thread devono essere opportunamente deallocati dal processo Main o 
+  dai rispettivi thread prima della conclusione.
+================================================================================

@@ -1,0 +1,302 @@
++Nei sistemi operativi moderni è possibile mappare un file in una regione di una memoria, una volta fatto ciò posso usare il file come un array. Ed è più efficiente della read o della write poichè posso andare a caricare nel programma solamente le regioni del file che vengono utilizzate in questo momento. 
+Mi permette di fare l'allocazione in pagine in sostanza, di solito io vado ad allocare per 4096 byte, quindi posso allocare tanti blocchi da 4096 byte. 
+size_t page_size = (size_t) sysconf(_SC_PAGESIZE); -> mi permette di conoscere dimensione mia pagina nel OS.
+Dove sysconf mi permette di ottenere informazioni sulla configurazione di sistema, _SC_PAGESIZE è la variabile che indiica i byte della pagina in memoria. 
+
+#include sys/mman.h -> la libreria per utilizzare mmap
+void *mmap(void *address, size_t length, int protect, int flags, int filedes, off_t offset); //function
+
+-address: indirizzo per iniziare la mappatura, se metto NULL se ne occupa l'OS
+-lenght: lunghezza della regione da mappare (arrotondata dalla dimensione della pagina
+-protect: protezione in lettura/scrittura, insomma, do i permessi
+	PROT_READ: Permette la lettura.
+	PROT_WRITE: Permette la scrittura.
+	PROT_EXEC: Permette l'esecuzione.
+	PROT_NONE: Nessun accesso consentito.
+-flags: opzione che controllano la mappatura
+	MAP_SHARED: Le modifiche alla memoria sono visibili a tutti i processi che mappano il file.
+	MAP_PRIVATE: Le modifiche non influenzano il file, creando una copia privata.
+	MAP_ANONYMOUS: Crea una mappatura senza collegarla a un file (inizializzata a zero).
+	MAP_FIXED: Richiede una mappatura a un indirizzo specifico (se fallisce, ritorna errore).
+-filedes: descrittore file da mappare
+-offset: offset iniziale file
+
+Ritorna: indirizzo nuova mappatura oppure -1 in caso di errore
+
+#include <stdio.h>
+#include <sys/mman.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
+
+int main() {
+    int fd = open("file.txt", O_RDONLY);
+    if (fd == -1) {
+        perror("Errore nell'apertura del file");
+        return 1;
+    }
+
+    struct stat sb;
+    if (fstat(fd, &sb) == -1) {
+        perror("Errore nel recupero delle informazioni del file");
+        return 1;
+    }
+
+    size_t length = sb.st_size;
+    char *data = mmap(NULL, length, PROT_READ, MAP_PRIVATE, fd, 0);
+    if (data == MAP_FAILED) {
+        perror("Errore nella mappatura del file");
+        return 1;
+    }
+
+    write(STDOUT_FILENO, data, length); // Stampa il contenuto del file
+    munmap(data, length); // Libera la memoria mappata
+    close(fd); // Chiude il file
+    return 0;
+}
+
+/*
+    struct stat sb;
+    if (fstat(fd, &sb) == -1) {
+        perror("Errore nel recupero delle informazioni del file");
+        return 1;
+    }
+
+    size_t length = sb.st_size;
+*/ -> ottengo dimensione file
+
+Parametri usati:
+	NULL: Lasciamo che il sistema scelga l'indirizzo di partenza per la mappatura.
+	length: La lunghezza del file (ottenuta con sb.st_size).
+	PROT_READ: La mappatura consente solo lettura.
+	MAP_PRIVATE: La mappatura è privata: modifiche locali non alterano il file originale.
+	fd: Il file descriptor del file da mappare.
+	0: L'offset nel file da cui partire (iniziamo dall'inizio del file).
+Risultato:
+	data è un puntatore che punta al contenuto del file direttamente nella memoria del processo.
+
+/* Codice che mi permette di creare 10 blocchi */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+int main() {
+    const char *filename = "example.dat"; // Nome del file da mappare
+    int fd;
+    struct stat sb;
+    char *mapped;
+
+    // 1. Aprire il file
+    fd = open(filename, O_RDONLY); // Apriamo il file in sola lettura
+    if (fd == -1) {
+        perror("Errore nell'apertura del file");
+        exit(EXIT_FAILURE);
+    }
+
+    // 2. Recuperare la dimensione del file
+    if (fstat(fd, &sb) == -1) { // Ottenere informazioni sul file
+        perror("Errore nel recupero delle informazioni del file");
+        close(fd);
+        exit(EXIT_FAILURE);
+    }
+
+    size_t file_size = sb.st_size; // Dimensione totale del file
+    printf("Dimensione del file: %zu bytes\n", file_size);
+
+    // 3. Mappare il file in memoria
+    mapped = mmap(NULL, file_size, PROT_READ, MAP_PRIVATE, fd, 0);
+    if (mapped == MAP_FAILED) { // Controllo errore
+        perror("Errore nella mappatura del file");
+        close(fd);
+        exit(EXIT_FAILURE);
+    }
+
+    // 4. Leggere i dati mappati
+    printf("Contenuto del file:\n");
+    write(STDOUT_FILENO, mapped, file_size); // Stampare il contenuto sulla console
+
+    // 5. Rilasciare la mappatura e chiudere il file
+    if (munmap(mapped, file_size) == -1) { // Smappare la memoria
+        perror("Errore nel rilascio della mappatura");
+    }
+    close(fd); // Chiudere il file
+
+    return 0;
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+int main() {
+    const char *filename = "example.dat"; // Nome del file da mappare
+    int fd;
+    struct stat sb;
+    char *mapped;
+
+    // 1. Aprire il file
+    fd = open(filename, O_RDONLY); // Apriamo il file in sola lettura
+    if (fd == -1) {
+        perror("Errore nell'apertura del file");
+        exit(EXIT_FAILURE);
+    }
+
+    // 2. Recuperare la dimensione del file
+    if (fstat(fd, &sb) == -1) { // Ottenere informazioni sul file
+        perror("Errore nel recupero delle informazioni del file");
+        close(fd);
+        exit(EXIT_FAILURE);
+    }
+
+    size_t file_size = sb.st_size; // Dimensione totale del file
+    printf("Dimensione del file: %zu bytes\n", file_size);
+
+    // 3. Mappare il file in memoria
+    mapped = mmap(NULL, file_size, PROT_READ, MAP_PRIVATE, fd, 0);
+    if (mapped == MAP_FAILED) { // Controllo errore
+        perror("Errore nella mappatura del file");
+        close(fd);
+        exit(EXIT_FAILURE);
+    }
+
+    // 4. Leggere i dati mappati
+    printf("Contenuto del file:\n");
+    write(STDOUT_FILENO, mapped, file_size); // Stampare il contenuto sulla console
+
+    // 5. Rilasciare la mappatura e chiudere il file
+    if (munmap(mapped, file_size) == -1) { // Smappare la memoria
+        perror("Errore nel rilascio della mappatura");
+    }
+    close(fd); // Chiudere il file
+
+    return 0;
+}
+
+Passaggi e Spiegazione:
+Apertura del file:
+	Usa open per aprire il file example.dat in modalità sola lettura (O_RDONLY).
+	Controlla eventuali errori, ad esempio se il file non esiste.
+Recupero dimensione del file:
+	Usa fstat per ottenere la dimensione del file (sb.st_size).
+	Questo è necessario per sapere quanto mappare in memoria.
+Mappatura del file:
+Usa mmap con i parametri:
+	NULL: Il sistema sceglie l'indirizzo di mappatura.
+	file_size: La dimensione del file (40 KB in questo caso).
+	PROT_READ: Accesso in sola lettura.
+	MAP_PRIVATE: Modifiche locali non influenzeranno il file.
+Accesso al contenuto:
+	Accedi ai dati come a un array di byte tramite il puntatore mapped.
+	In questo esempio, il contenuto del file viene stampato usando write.
+Rilascio delle risorse:
+	Usa munmap per smappare la memoria.
+	Usa close per chiudere il file descriptor.
+Note Importanti
+Dimensione del file:
+	Assicurati che il file sia almeno 40 KB per il test (usa dd o un editor per crearlo).
+Accesso casuale:
+	Puoi accedere a specifici blocchi usando mapped + offset:
+	printf("Blocco 2: %.4096s\n", mapped + 4096);
+	Questo accede al secondo blocco da 4 KB.
+Error Handling:
+	Gestisci eventuali errori come file non esistenti, mancanza di memoria, o problemi di mappatura.
+
+/* Codice che stampa 10 blocchi */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+int main() {
+    const char *filename = "example.dat"; // Nome del file da mappare
+    int fd;
+    struct stat sb;
+    char *mapped;
+    size_t block_size = 4096; // Dimensione di ogni blocco (4 KB)
+
+    // 1. Aprire il file
+    fd = open(filename, O_RDONLY);
+    if (fd == -1) {
+        perror("Errore nell'apertura del file");
+        exit(EXIT_FAILURE);
+    }
+
+    // 2. Recuperare la dimensione del file
+    if (fstat(fd, &sb) == -1) {
+        perror("Errore nel recupero delle informazioni del file");
+        close(fd);
+        exit(EXIT_FAILURE);
+    }
+
+    size_t file_size = sb.st_size; // Dimensione totale del file
+    printf("Dimensione del file: %zu bytes\n", file_size);
+
+    // 3. Mappare il file in memoria
+    mapped = mmap(NULL, file_size, PROT_READ, MAP_PRIVATE, fd, 0);
+    if (mapped == MAP_FAILED) {
+        perror("Errore nella mappatura del file");
+        close(fd);
+        exit(EXIT_FAILURE);
+    }
+
+    // 4. Stampare tutti i blocchi da 4 KB
+    size_t num_blocks = file_size / block_size; // Numero di blocchi
+    if (file_size % block_size != 0) {
+        num_blocks++; // Considera un blocco parziale se esiste
+    }
+
+    for (size_t i = 0; i < num_blocks; i++) {
+        printf("Blocco %zu:\n", i + 1);
+
+        // Calcola l'inizio e la fine del blocco
+        size_t start_offset = i * block_size;
+        size_t end_offset = start_offset + block_size;
+
+        // Se siamo all'ultimo blocco e il file è più corto, aggiustiamo la dimensione
+        if (end_offset > file_size) {
+            end_offset = file_size;
+        }
+
+        // Stampare il blocco
+        write(STDOUT_FILENO, mapped + start_offset, end_offset - start_offset);
+        printf("\n----------------------\n");
+    }
+
+    // 5. Rilasciare la mappatura e chiudere il file
+    if (munmap(mapped, file_size) == -1) {
+        perror("Errore nel rilascio della mappatura");
+    }
+    close(fd);
+
+    return 0;
+}
+
+Cosa Fa il Codice:
+Calcolo dei blocchi:
+	Ogni blocco è di 4 KB.
+	Il totale dei blocchi è calcolato dividendo la dimensione del file per la dimensione del blocco:
+	size_t num_blocks = file_size / block_size;
+	if (file_size % block_size != 0) num_blocks++;
+	Questo considera un eventuale blocco parziale alla fine.
+Iterazione sui blocchi:
+	Per ogni blocco, calcola l'offset iniziale e finale:
+	size_t start_offset = i * block_size;
+	size_t end_offset = start_offset + block_size;
+	Se l'ultimo blocco è più corto, aggiusta end_offset.
+Stampa del blocco:
+	Usa write per stampare solo i byte del blocco corrente:
+	write(STDOUT_FILENO, mapped + start_offset, end_offset - start_offset);
+Separatore:
+	Stampa una linea separatrice per distinguere i blocchi.
+
+
+
+

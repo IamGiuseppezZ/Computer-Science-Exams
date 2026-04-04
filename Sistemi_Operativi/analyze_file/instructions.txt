@@ -1,0 +1,78 @@
+================================================================================
+ESAME DI SISTEMI OPERATIVI - PROVA DI LABORATORIO
+TITOLO: Analizzatore di Testi Concorrente (Pipeline a 3 Stadi)
+================================================================================
+
+DESCRIZIONE DEL PROBLEMA
+Si scriva un programma in linguaggio C, basato sulla libreria <pthread.h> 
+e sui semafori, per l'analisi concorrente di file di testo distribuiti 
+all'interno di N directory.
+
+Il programma deve implementare un'architettura Produttore-Consumatore 
+multi-stadio (Pipeline) utilizzando due buffer circolari condivisi, 
+entrambi di dimensione MAX_BUFFER = 2.
+
+Il programma accetta da riga di comando un numero variabile di parametri
+rappresentanti i percorsi delle directory da analizzare:
+Uso: ./programma <dir1> <dir2> ... <dirN>
+
+ARCHITETTURA DEI THREAD
+Il processo principale deve creare la seguente struttura di thread:
+
+1. THREAD ANALYZER (Produttori Stadio 1):
+   - Deve essere creato un thread "Analyzer" per OGNI directory passata 
+     come parametro (N thread in totale).
+   - Ogni Analyzer apre la propria directory e, per ogni file regolare (DT_REG)
+     trovato, crea una struttura contenente il nome della directory e il nome 
+     del file.
+   - Inserisce tale struttura nel BUFFER 1 seguendo rigorosamente lo schema 
+     del Produttore/Consumatore.
+   - Terminata la lettura della directory, il thread Analyzer deve terminare.
+
+2. THREAD CALCULATOR (Consumatore Stadio 1 / Produttore Stadio 2):
+   - Deve essere creato UN SOLO thread "Calculator".
+   - Estrae ciclicamente i file dal BUFFER 1.
+   - Apre il file specificato, lo legge riga per riga e calcola:
+     a) Il numero totale di righe.
+     b) Il numero totale di parole (utilizzando funzioni thread-safe 
+        come strtok_r).
+     c) Il numero totale di lettere alfabetiche (ignorando punteggiatura 
+        e numeri, usando isalpha()).
+   - Inserisce i risultati (conteggi + riferimento al file) all'interno del 
+     BUFFER 2, comportandosi a sua volta da produttore.
+
+3. THREAD AGGREGATOR / MAIN (Consumatore Stadio 2):
+   - Deve essere creato UN SOLO thread "Aggregator".
+   - Estrae ciclicamente i risultati dal BUFFER 2.
+   - Stampa a video i risultati parziali del file appena elaborato.
+   - Accumula i risultati in tre contatori globali (Righe Totali, Parole 
+     Totali, Lettere Totali).
+
+TERMINAZIONE E VINCOLI (LEGGERE ATTENTAMENTE)
+- Terminazione Pulita (No Deadlock): Il programma DEVE terminare 
+  correttamente quando tutti i file di tutte le directory sono stati elaborati. 
+  Poiché il Calculator e l'Aggregator non sanno a priori quanti file 
+  processeranno, è OBBLIGATORIO implementare una logica di terminazione 
+  robusta (es. uso di una "Poison Pill" / Messaggio Sentinella inserito 
+  dall'ultimo Analyzer che termina).
+- Prima di chiudersi, il thread Aggregator deve stampare le STATISTICHE GLOBALI
+  riassuntive di tutti i file letti.
+- Attesa Attiva: È severamente vietato l'uso di attesa attiva (busy waiting). 
+  Gli accessi ai buffer devono essere sincronizzati esclusivamente tramite 
+  semafori e mutex.
+- Memory Leaks: Tutte le risorse allocate dinamicamente (malloc) devono essere
+  liberate prima della terminazione del processo. Tutti i semafori e i mutex 
+  devono essere distrutti.
+
+ESEMPIO DI OUTPUT ATTESO:
+[Analyzer-0] Pusho file: '[dir1/fileA.txt]'
+[Analyzer-1] Pusho file: '[dir2/fileB.txt]'
+[CALCULATE] File: '[dir1/fileA.txt]' Analizzato.
+[MAIN] Ricevuto 'dir1/fileA.txt' -> Parziali | Righe: 10 | Parole: 50 | Lettere: 300
+...
+=========================================
+STATISTICHE FINALI GLOBALI:
+Totale Righe   : 150
+Totale Parole  : 840
+Totale Lettere : 5420
+=========================================

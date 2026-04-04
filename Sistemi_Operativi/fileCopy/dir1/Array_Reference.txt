@@ -1,0 +1,26 @@
+#include <stdio.h>
+
+void swap(int* array, int n){
+    array[n] = 30;
+}
+
+void swap_1(int number){
+    number = 30;
+}
+
+void swap_2(int* number){
+    *number = 150;
+}
+
+int main(){
+
+    int array[4] = {1,2,3,4};
+    swap(array, 2);
+    printf("%d\n", array[2]);
+    swap_1(array[3]); // -> sto prendendo il valore 3, sto facendo *(array + 3), quindi prende il valore
+    swap_2(&array[3]);
+    printf("%d\n", array[3]);
+
+}
+
+COME MODIFICARE VALORE DI UN SINGOLO ELEMENTO DELL'ARRAY PASSANDO PER FUNZIONE. 

@@ -1,0 +1,32 @@
+{
+	"folders": [
+		{
+			"path": "Esame_Laboratorio/decryptor"
+		},
+		{
+			"path": "Esame_Laboratorio/file_size"
+		},
+		{
+			"path": "Esame_Laboratorio/file_dir"
+		},
+		{
+			"path": "Esame_Laboratorio/File_Copy"
+		},
+		{
+			"path": "Esame_Laboratorio/calculate_file"
+		},
+		{
+			"path": "Esame_Laboratorio/auction"
+		},
+		{
+			"path": "Esame_Laboratorio/file_copy_new"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"*.embeddedhtml": "html",
+			"string.h": "c",
+			"initializer_list": "c"
+		}
+	}
+}

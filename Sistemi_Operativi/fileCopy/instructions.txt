@@ -1,0 +1,73 @@
+================================================================================
+ESAME DI SISTEMI OPERATIVI - PROVA DI LABORATORIO
+TITOLO: Copia Concorrente di File tramite Memory Mapping (mmap)
+================================================================================
+
+DESCRIZIONE DEL PROBLEMA
+Si richiede la progettazione e l'implementazione in linguaggio C di un 
+programma multithread (basato su <pthread.h> e semafori) che effettui la 
+copia concorrente di file da N directory sorgenti verso un'unica directory 
+di destinazione.
+
+Per eseguire le operazioni di I/O (lettura e scrittura dei file), il 
+candidato deve OBBLIGATORIAMENTE utilizzare il meccanismo della memoria 
+mappata (system call mmap(), munmap() e msync()), evitando le classiche 
+read() e write().
+
+Il programma deve ricevere da riga di comando un numero arbitrario di 
+directory sorgenti, seguite obbligatoriamente dalla directory di destinazione 
+come ultimo parametro.
+Uso: ./programma <dir_origine_1> [dir_origine_2 ...] <dir_destinazione>
+
+ARCHITETTURA DEI THREAD E SINCRONIZZAZIONE
+Il sistema deve implementare una logica Produttore/Consumatore basata su 
+un Buffer Circolare condiviso di dimensione SIZE_BUFFER = 10. Ogni elemento 
+del buffer deve contenere un "blocco" (chunk) di dati di un file, oltre ai 
+metadati necessari (nome file, dimensione totale, offset del blocco corrente, 
+dimensione del blocco).
+
+1. I THREAD "READER" (Produttori):
+   - Deve essere istanziato un thread Reader per ciascuna directory sorgente.
+   - Ogni Reader apre la propria directory e la esplora. Per ogni file 
+     regolare (DT_REG) trovato:
+       a. Apre il file in sola lettura.
+       b. Ne calcola la dimensione tramite fstat().
+       c. Lo mappa in memoria (mmap con PROT_READ).
+       d. Suddivide logicamente il file in blocchi di dimensione massima 
+          MAX_BUFFER (es. 1024 byte).
+   - Inserisce i blocchi generati all'interno del Buffer Circolare Condiviso, 
+     rispettando le regole di mutua esclusione e sincronizzazione sui semafori 
+     (Empty/Full).
+   - Finita la divisione in blocchi, rimuove la mappatura (munmap) e chiude 
+     il file sorgente.
+
+2. IL THREAD "WRITER" (Consumatore):
+   - Deve essere creato UN SOLO thread Writer.
+   - Il Writer si occupa di estrarre i blocchi dal buffer condiviso.
+   - Per ricostruire i file nella directory di destinazione (creata dal Writer 
+     se non esiste), il thread deve mantenere una struttura dati dinamica 
+     (es. Lista Concatenata) per tracciare i file attualmente aperti/mappati in 
+     scrittura.
+   - Per ogni blocco estratto:
+       a. Se il file associato al blocco NON è presente nella lista: crea un 
+          nuovo file nella dir. di destinazione, lo ridimensiona alla sua 
+          dimensione totale (tramite ftruncate()), lo mappa in memoria 
+          (PROT_READ | PROT_WRITE, MAP_SHARED) e aggiunge il riferimento alla lista.
+       b. Se il file è GIA' presente nella lista: recupera il puntatore 
+          all'area di memoria mappata.
+       c. Utilizzando l'offset specificato nel blocco, copia (memcpy) i dati 
+          esattamente nella posizione corretta della memoria mappata del file 
+          di destinazione.
+
+TERMINAZIONE E GESTIONE RISORSE (VINCOLI DI VALIDITA')
+- Sincronizzazione Pura: È vietato l'uso di attesa attiva (busy waiting).
+- Terminazione Graceful: Il Writer non sa quanti blocchi o quanti file 
+  riceverà. I Reader devono tenere traccia del proprio stato di terminazione 
+  (es. un contatore condiviso di Reader attivi). L'ultimo Reader che termina 
+  l'esplorazione deve iniettare una "Poison Pill" (es. un blocco con filename 
+  "EOF_TERMINATE") nel buffer per segnalare al Writer di procedere alla chiusura.
+- Flush e Pulizia (Memory Leaks): Prima della terminazione definitiva, il Writer 
+  deve iterare sulla propria lista concatenata per forzare la sincronizzazione 
+  su disco (msync), rimuovere la mappatura (munmap), chiudere i file descriptor 
+  e liberare tutti i nodi della lista allocati con malloc.
+================================================================================
