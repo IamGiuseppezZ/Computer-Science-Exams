@@ -13,8 +13,10 @@ Credo che queste tre directory rappresentino al meglio le mie competenze tecnich
 * **Architetture di Reti:** Implementazione di protocolli di comunicazione, socket programming (TCP/UDP) e gestione dell'interoperabilità tra sistemi.
 * **Algoritmi e Strutture Dati:** Implementazione dei principali algoritmi del testo "Cormen" (CLRS), con particolare attenzione all'efficienza computazionale e alle strutture dati avanzate (Alberi RB, Grafi, Hash Tables).
 
-## Note sul percorso accademico
-Sebbene questo repository si concentri su queste tre aree core, esse rappresentano solo una parte del mio intero percorso di studi. Durante i tre anni di laurea ho affrontato con successo numerosi altri esami e progetti in ambiti diversi, tra cui **Basi di Dati**, **Ingegneria del Software**, **Sviluppo Web** e **Calcolo Numerico**, che per motivi di sintesi e focalizzazione non sono inclusi in questa specifica raccolta.
+## 💡 Note sul percorso accademico
+Sebbene questo repository si concentri su queste tre aree core, esse rappresentano solo una parte del mio intero percorso di studi. Durante i tre anni di laurea ho affrontato con successo numerosi altri esami fondamentali, tra cui **Architettura dei Calcolatori**, **Internet Security & VAPT**, **Basi di Dati**, **Architettura degli elaboratori** e **Ingegneria del Software**, che per motivi di sintesi e focalizzazione su ambiti specifici non sono inclusi in questa raccolta. 
+
+I progetti qui presenti sono stati selezionati perché offrono una panoramica completa sulla mia capacità di gestire la logica di programmazione a basso livello e l'ottimizzazione delle risorse, pilastri portanti della mia formazione come sviluppatore.
 
 ## Nota Tecnica
 Il codice contenuto in queste cartelle è stato spesso realizzato in contesti d'esame o laboratori con tempi limitati (circa 2.5 - 3 ore). Di conseguenza, i progetti sono ottimizzati per dimostrare la solidità della logica applicativa e la corretta risoluzione dei problemi critici (sincronizzazione, gestione memoria, networking) nel minor tempo possibile.
