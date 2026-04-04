@@ -14,7 +14,7 @@ Credo che queste tre directory rappresentino al meglio le mie competenze tecnich
 * **Algoritmi e Strutture Dati:** Implementazione dei principali algoritmi del testo "Cormen" (CLRS), con particolare attenzione all'efficienza computazionale e alle strutture dati avanzate (Alberi RB, Grafi, Hash Tables).
 
 ## 💡 Note sul percorso accademico
-Sebbene questo repository si concentri su queste tre aree core, esse rappresentano solo una parte del mio intero percorso di studi. Durante i tre anni di laurea ho affrontato con successo numerosi altri esami fondamentali, tra cui **Architettura dei Calcolatori**, **Internet Security & VAPT**, **Basi di Dati**, **Architettura degli elaboratori** e **Ingegneria del Software**, che per motivi di sintesi e focalizzazione su ambiti specifici non sono inclusi in questa raccolta. 
+Sebbene questo repository si concentri su queste tre aree core, esse rappresentano solo una parte del mio intero percorso di studi. Durante i tre anni di laurea ho affrontato con successo numerosi altri esami fondamentali, tra cui **Architettura dei Calcolatori**, **Internet Security & VAPT**, **Basi di Dati** e **Ingegneria del Software**, che per motivi di sintesi e focalizzazione su ambiti specifici non sono inclusi in questa raccolta. 
 
 I progetti qui presenti sono stati selezionati perché offrono una panoramica completa sulla mia capacità di gestire la logica di programmazione a basso livello e l'ottimizzazione delle risorse, pilastri portanti della mia formazione come sviluppatore.
 
