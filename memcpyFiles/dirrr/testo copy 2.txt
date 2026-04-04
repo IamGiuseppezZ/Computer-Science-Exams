@@ -1,7 +1,0 @@
-faeraefrfarfarfarfafrarf
-faeraefrfarfarfarfafrarffrare
-<div class="accordion accordion-flush" id="faeraefrfarfarfarfafrarfferfef
-faeraefrfarfarfarfafrarf">
-    <div class="accordion-item">
-        <h2 class="accordion-header" id="flush-headingOne">
-            <button
