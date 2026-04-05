@@ -17,9 +17,8 @@ typedef struct {
     pthread_mutex_t lock; // Protects pending_target and pending_message
 } ClientState;
 
-// ==========================================================
 // RECEIVER THREAD: Handles Server responses and P2P messages
-// ==========================================================
+
 void* waitForMessage(void* arg){
     ClientState* state = (ClientState*) arg;
     struct sockaddr_in senderAddr;
@@ -66,9 +65,7 @@ void* waitForMessage(void* arg){
     return NULL;
 }
 
-// ==========================================================
 // SENDER THREAD: Handles User Input
-// ==========================================================
 void* senderMessage(void* arg){
     ClientState* state = (ClientState*) arg;
     usleep(100000); // Small delay to let the UI settle
