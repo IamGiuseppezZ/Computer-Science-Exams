@@ -42,7 +42,7 @@ int main(int argc, char* argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    srand((unsigned int)time(NULL) ^ getpid()); // Better entropy
+    srand((unsigned int)time(NULL) ^ getpid()); 
     
     int myId = atoi(argv[1]);
     int myUdpPort = atoi(argv[2]);
