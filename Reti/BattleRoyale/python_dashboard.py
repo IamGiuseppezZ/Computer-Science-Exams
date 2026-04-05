@@ -10,7 +10,6 @@ def main():
     HOST = "127.0.0.1"
     PORT = 12000 # La porta in cui il Server C spara la telemetria
     
-    # type (int), player_id (int), pos_x (int), pos_y (int), health_left (int)
     PACKET_FORMAT = "> i i i i i"
     PACKET_SIZE = struct.calcsize(PACKET_FORMAT)
     
