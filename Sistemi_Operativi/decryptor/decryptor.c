@@ -8,7 +8,7 @@
 
 #define MAX_BUFFER 256
 
-// ---------------- Strutture Dati ----------------
+// Strutture Dati 
 
 typedef struct {
     int num_keys;
@@ -36,7 +36,7 @@ typedef struct {
     char chiave[MAX_BUFFER];
 } Shared_Thread;
 
-// ---------------- Funzioni di Supporto ----------------
+//  Funzioni di Supporto 
 
 // Conta le chiavi (righe) presenti nel file dei cifrari
 int calc_cifrario(const char* filepath) {
@@ -103,9 +103,9 @@ void decifra_frase(const char* chiave, const char* frase_cifrata, char* frase_de
     frase_decifrata[i] = '\0'; // Terminatore di stringa
 }
 
-// ---------------- Thread Functions ----------------
+//  Thread Functions 
 
-// THREAD WORKER: I Decifratori
+// THREAD WORKER:
 void* decryptor_func(void* args) {
     Shared_Thread* thread_info = (Shared_Thread*) args;
     Struct_Shared* shared = thread_info->shared;
@@ -225,10 +225,6 @@ int main(int argc, char** argv) {
             exit(EXIT_FAILURE);
         }
     }
-
-    // Passiamo argv[2] direttamente se volessimo, ma modificheremo leggermente il thread per semplicità
-    // Nel codice sopra ho hardcodato il nome del file per farti capire la logica, 
-    // all'esame ricordati di usare argv[2] passandolo tramite args.
     
     if (pthread_create(&cypertext, NULL, cypertext_func, shared) != 0){
         perror("[-] Errore creazione thread cypertext");
