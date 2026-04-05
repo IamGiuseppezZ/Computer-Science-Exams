@@ -255,11 +255,3 @@ int main(int argc, char **argv)
         pthread_join(dir_thread[i], NULL);
     }
 }
-
-// n DIR-I thread, che sono il numero di directory, ogni thread aggiunge il nome del file nella struct
-// SEARCH thread che cerca le occorrenze scorrendo ogni file contenuto nell'array condiviso.
-/*
-Il numero di occorrenze trovate da search e il file, verranno passati al thread MAIN che avrà
-il compito di occuparsi di tenere da parte il conteggio delle occorrenze, in base al numero
-di occorrenze che arrivano lui deve stampare il parziale
-*/
