@@ -17,7 +17,6 @@ int createSocketTcp(void) {
         exit(EXIT_FAILURE);
     }
     
-    // Allow address reuse to prevent "Address already in use" errors during rapid restarts
     const int opt = 1;
     setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 
