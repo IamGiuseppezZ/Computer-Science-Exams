@@ -63,7 +63,7 @@ void loadUsers(ServerContext* ctx){
     fclose(fd);
 }
 
-// --- Gestori Richieste ---
+//  Gestori Richieste 
 void processRegister(RequestArgs* args) {
     Packet rx = args->rx_packet;
     Packet tx;
