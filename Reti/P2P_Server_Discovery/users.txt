@@ -1,0 +1,8 @@
+Giuseppe 6001
+Francesco 6002
+Franco 6003
+Gabriele 5004
+Macellaio 6009
+Giacomo 6007
+Pippo 6010
+Pippo 2010
