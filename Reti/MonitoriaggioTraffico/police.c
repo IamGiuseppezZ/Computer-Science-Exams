@@ -28,11 +28,8 @@ void* handleTcpReceiver(void* args) {
 }
 
 int main(int argc, char* argv[]) {
-    // Port argument check (optional if you decide to use it later)
     if (argc < 2) {
         fprintf(stderr, "Usage: %s <Client_Port>\n", argv[0]);
-        // Defaulting to a generic start if no port is provided is also an option,
-        // but strict arguments are better for clean tools.
         exit(EXIT_FAILURE);
     }
     
@@ -57,7 +54,6 @@ int main(int argc, char* argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    // Wait for the receiver thread to finish (e.g., server shutdown)
     pthread_join(tid, NULL);
     
     close(sockfd);
