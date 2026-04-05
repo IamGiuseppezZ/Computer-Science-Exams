@@ -3,7 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <pthread.h>
-#include "mac_sem.h" // Assicurati di avere questo file nella stessa cartella
+#include "mac_sem.h" 
 #include <time.h>
 #include <ctype.h>
 
@@ -45,9 +45,7 @@ typedef struct {
     char frase[MAX_BUFFER];
 } FraseStr;
 
-// ==========================================
 // FUNZIONI DI SUPPORTO
-// ==========================================
 
 int get_num_line(FILE* fd) {
     int counter = 0;
@@ -114,10 +112,7 @@ int update_table_and_count(char* offuscata, const char* chiara, char estratta) {
     return occorrenze;
 }
 
-// ==========================================
 // THREAD DEALER E PLAYER
-// ==========================================
-
 void* dealer_func(void* args) {
     Struct_Shared_Dealer* thread_info = (Struct_Shared_Dealer*) args;
     Struct_Shared* shared = thread_info->shared;
@@ -246,10 +241,7 @@ void* players_func(void* args) {
     return NULL;
 }
 
-// ==========================================
 // MAIN
-// ==========================================
-
 int main(int argc, char** argv) {
     if (argc < 4) {
         fprintf(stderr, "Uso: %s <numero_giocatori> <numero_partite> <file_frasi.txt>\n", argv[0]);
