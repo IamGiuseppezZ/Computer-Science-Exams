@@ -1,4 +1,4 @@
-#include "lib-misc.h" // Assumendo che contenga macro come exit_with_sys_err
+#include "lib-misc.h" 
 #include "mac_sem.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -54,7 +54,7 @@ typedef struct {
     char dir_to_read[FILENAME_MAX];
 } Struct_Thread;
 
-// ---- INIZIO LISTA CONCATENATA PER IL WRITER ----
+//  INIZIO LISTA CONCATENATA PER IL WRITER 
 // Serve al Writer per tenere traccia dei file mmap() aperti in scrittura
 typedef struct list_file {
     struct list_file* next;
@@ -97,12 +97,9 @@ void cleanList(List* head) {
         current = next;
     }
 }
-// ---- FINE LISTA CONCATENATA ----
 
 
-// ==========================================
 // THREAD PRODUTTORE: Reader
-// ==========================================
 void* reader_func(void* args) {
     Struct_Thread* thread_info = (Struct_Thread*) args;
     Stack* shared = thread_info->shared;
@@ -192,14 +189,12 @@ end_reader:
     }
     pthread_mutex_unlock(&shared->mutex_readers);
 
-    free(thread_info); // Previene memory leak
+    free(thread_info); 
     return NULL;
 }
 
 
-// ==========================================
 // THREAD CONSUMATORE: Writer
-// ==========================================
 void* writer_func(void* args) {
     Stack* shared = (Stack*) args;
     List* head = NULL;
@@ -264,15 +259,12 @@ void* writer_func(void* args) {
         memcpy(file_node->mapped + chunk.offset_file, chunk.buffer_file, chunk.dimensione_blocco);
     }
 
-    // Libera tutte le mmap() aperte per evitare leak di risorse OS
     cleanList(head);
     return NULL;
 }
 
 
-// ==========================================
 // MAIN
-// ==========================================
 int main(int argc, char** argv) {
     if (argc < 3) {
         fprintf(stderr, "Uso: %s <dir_origine_1> [dir_origine_N...] <dir_destinazione>\n", argv[0]);
