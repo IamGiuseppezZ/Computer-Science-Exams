@@ -1,5 +1,6 @@
 🌐 ISP Management System - Database Design & Implementation
 Questo repository contiene la progettazione completa (concettuale, logica e fisica) e l'implementazione in MySQL di un database relazionale per un Internet Service Provider (ISP). Il sistema è progettato per gestire in modo integrato l'erogazione dei contratti, l'infrastruttura di rete, il tracciamento dei log di sessione, l'assistenza tecnica e il ciclo di fatturazione.
+
 🎯 Obiettivo del Progetto e Competenze Dimostrate
 Il progetto simula un ambiente di produzione reale con volumi di dati massivi, dimostrando la capacità di gestire l'intero ciclo di vita del dato.
 Attraverso questo progetto ho consolidato e dimostrato le seguenti competenze tecniche:
